@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="WynnwaveInvoice.Application/WynnwaveInvoice.Application.csproj" />
+  <Project Path="WynnwaveInvoice.Domain/WynnwaveInvoice.Domain.csproj" />
+  <Project Path="WynnwaveInvoice.Infrastructure/WynnwaveInvoice.Infrastructure.csproj" />
+  <Project Path="WynnwaveInvoice.Web/WynnwaveInvoice.Web.Client/WynnwaveInvoice.Web.Client.csproj" />
+  <Project Path="WynnwaveInvoice.Web/WynnwaveInvoice.Web/WynnwaveInvoice.Web.csproj" />
+</Solution>
