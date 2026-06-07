@@ -2,9 +2,178 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+        <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
+        <p class="mt-1 text-sm text-slate-500">Een overzicht van je omzet, openstaande en betaalde facturen.</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <button class="btn btn-secondary">
+            <i class="ti ti-calendar text-base"></i> Deze maand <i class="ti ti-chevron-down text-base text-slate-400"></i>
+        </button>
+        <a href="facturen/nieuw" class="btn btn-primary">
+            <i class="ti ti-plus text-base"></i> Nieuwe factuur
+        </a>
+    </div>
+</div>
 
-Welcome to your new app.
-<h1 class="text-3xl font-bold underline">
-    Hello world!
-</h1>
+@* ---- KPI-kaarten ---- *@
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    @foreach (var k in _kpis)
+    {
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="grid h-10 w-10 place-items-center rounded-xl @k.Tint">
+                    <i class="ti @k.Icon text-xl"></i>
+                </span>
+                <span class="rounded-full px-2 py-0.5 text-xs font-semibold @k.BadgeClass">@k.Badge</span>
+            </div>
+            <p class="mt-4 text-sm text-slate-500">@k.Label</p>
+            <p class="mt-1 font-display text-2xl font-bold tracking-tight text-slate-900 tabular-nums">@k.Value</p>
+        </div>
+    }
+</div>
+
+@* ---- Grafiek + betaalstatus ---- *@
+<div class="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-display text-base font-semibold text-slate-900">Omzet 2026</h2>
+                <p class="text-sm text-slate-500">Betaald vs. openstaand per maand</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-slate-500">
+                <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-brand-500"></span> Betaald</span>
+                <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-accent-400"></span> Openstaand</span>
+            </div>
+        </div>
+        <div class="mt-6 flex h-52 items-end justify-between gap-2 sm:gap-3">
+            @foreach (var b in _months)
+            {
+                <div class="flex flex-1 flex-col items-center gap-2">
+                    <div class="flex w-full max-w-[26px] flex-col justify-end" style="height:160px">
+                        <div class="w-full rounded-t-sm @(b.Now ? "bg-accent-400" : "bg-accent-300/70")" style="height:@(b.Open)px"></div>
+                        <div class="w-full @(b.Now ? "bg-accent-500" : "bg-brand-500")" style="height:@(b.Paid)px"></div>
+                    </div>
+                    <span class="text-[11px] @(b.Now ? "font-semibold text-slate-700" : "text-slate-400")">@b.Label</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="font-display text-base font-semibold text-slate-900">Betaalstatus</h2>
+        <p class="text-sm text-slate-500">Verdeling van het totaalbedrag</p>
+        <div class="mt-4 flex items-center justify-center">
+            <div class="relative h-36 w-36 rounded-full"
+                 style="background: conic-gradient(#3b7bf6 0 64%, #f97316 64% 90%, #ef4444 90% 100%);">
+                <div class="absolute inset-[14px] grid place-items-center rounded-full bg-white">
+                    <div class="text-center">
+                        <p class="font-display text-xl font-bold text-slate-900 tabular-nums">€ 64.250</p>
+                        <p class="text-[11px] text-slate-400">totaal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <ul class="mt-5 space-y-2.5 text-sm">
+            <li class="flex items-center justify-between">
+                <span class="inline-flex items-center gap-2 text-slate-600"><span class="h-2.5 w-2.5 rounded-full bg-brand-500"></span> Betaald</span>
+                <span class="font-semibold text-slate-900 tabular-nums">€ 41.120</span>
+            </li>
+            <li class="flex items-center justify-between">
+                <span class="inline-flex items-center gap-2 text-slate-600"><span class="h-2.5 w-2.5 rounded-full bg-accent-500"></span> Openstaand</span>
+                <span class="font-semibold text-slate-900 tabular-nums">€ 16.700</span>
+            </li>
+            <li class="flex items-center justify-between">
+                <span class="inline-flex items-center gap-2 text-slate-600"><span class="h-2.5 w-2.5 rounded-full bg-red-500"></span> Achterstallig</span>
+                <span class="font-semibold text-slate-900 tabular-nums">€ 6.430</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+@* ---- Facturentabel ---- *@
+<div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="flex items-center justify-between px-6 py-4">
+        <h2 class="font-display text-base font-semibold text-slate-900">Recente facturen</h2>
+        <a href="facturen" class="inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700">
+            Bekijk alle <i class="ti ti-arrow-right text-base"></i>
+        </a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead>
+                <tr class="border-y border-slate-100 bg-slate-50/60 text-xs uppercase tracking-wide text-slate-400">
+                    <th class="px-6 py-3 font-semibold">Factuur</th>
+                    <th class="px-6 py-3 font-semibold">Klant</th>
+                    <th class="px-6 py-3 font-semibold">Datum</th>
+                    <th class="px-6 py-3 text-right font-semibold">Bedrag</th>
+                    <th class="px-6 py-3 font-semibold">Status</th>
+                    <th class="px-6 py-3 text-right font-semibold">Actie</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @foreach (var inv in _invoices)
+                {
+                    <tr class="transition hover:bg-slate-50/70">
+                        <td class="px-6 py-4 font-semibold text-slate-900 tabular-nums">@inv.Number</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="grid h-8 w-8 place-items-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700">@inv.Initials</span>
+                                <span class="text-slate-700">@inv.Client</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-500">@inv.Date</td>
+                        <td class="px-6 py-4 text-right font-semibold text-slate-900 tabular-nums">@inv.Amount</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset @StatusClass(inv.Status)">@inv.Status</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
+                                <i class="ti ti-dots text-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private record Kpi(string Label, string Value, string Icon, string Tint, string Badge, string BadgeClass);
+    private record Month(string Label, int Paid, int Open, bool Now = false);
+    private record Invoice(string Number, string Client, string Initials, string Date, string Amount, string Status);
+
+    private readonly Kpi[] _kpis =
+    {
+        new("Totale omzet",        "€ 48.250", "ti-coins",          "bg-brand-50 text-brand-600",   "12,5%",      "bg-emerald-50 text-emerald-600"),
+        new("Openstaand",          "€ 12.800", "ti-hourglass",      "bg-accent-50 text-accent-600", "8 facturen", "bg-slate-100 text-slate-500"),
+        new("Betaald deze maand",  "€ 31.450", "ti-circle-check",   "bg-emerald-50 text-emerald-600","4,2%",      "bg-emerald-50 text-emerald-600"),
+        new("Achterstallig",       "€ 3.200",  "ti-alert-triangle", "bg-red-50 text-red-600",       "3 facturen", "bg-red-50 text-red-600"),
+    };
+
+    private readonly Month[] _months =
+    {
+        new("Jan",60,18), new("Feb",72,14), new("Mrt",55,30), new("Apr",80,20),
+        new("Mei",68,12), new("Jun",92,24, Now:true), new("Jul",48,16), new("Aug",64,10),
+        new("Sep",75,22), new("Okt",58,14), new("Nov",84,28), new("Dec",70,18),
+    };
+
+    private readonly Invoice[] _invoices =
+    {
+        new("#INV-2041","De Vries Architecten","DA","04 jun 2026","€ 4.250","Verzonden"),
+        new("#INV-2040","Bakkerij Janssen","BJ","02 jun 2026","€ 880","Betaald"),
+        new("#INV-2039","Coöperatie Noord","CN","29 mei 2026","€ 12.400","Achterstallig"),
+        new("#INV-2038","Studio Lumen","SL","27 mei 2026","€ 2.150","Betaald"),
+        new("#INV-2037","Hofman & Co","HC","24 mei 2026","€ 6.700","Concept"),
+    };
+
+    private static string StatusClass(string status) => status switch
+    {
+        "Betaald"       => "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+        "Verzonden"     => "bg-brand-50 text-brand-700 ring-brand-600/20",
+        "Achterstallig" => "bg-red-50 text-red-700 ring-red-600/20",
+        _               => "bg-slate-100 text-slate-600 ring-slate-500/20",
+    };
+}

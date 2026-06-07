@@ -1,0 +1,292 @@
+@layout EmptyLayout
+
+@page "/kitchensink"
+
+<div class="mx-auto max-w-5xl px-5 py-10 lg:px-8">
+
+  <div class="mb-10 flex items-center gap-3">
+    <div class="grid h-10 w-10 place-items-center rounded-xl bg-accent-500 text-white"><i class="ti ti-components text-xl"></i></div>
+    <div>
+      <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900">Componenten — kitchen sink</h1>
+      <p class="text-sm text-slate-500">Alle bouwstenen op basis van de classes in <code class="rounded bg-slate-100 px-1 text-xs">app.css</code>.</p>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <section class="section">
+    <h2 class="sec-title">Knoppen</h2>
+    <div class="panel">
+      <div class="flex flex-wrap items-center gap-3">
+        <button class="btn btn-primary"><i class="ti ti-plus"></i> Primair</button>
+        <button class="btn btn-secondary">Secundair</button>
+        <button class="btn btn-outline">Outline</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-danger"><i class="ti ti-trash"></i> Verwijderen</button>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <button class="btn btn-primary btn-sm">Klein</button>
+        <button class="btn btn-primary">Normaal</button>
+        <button class="btn btn-primary" disabled>Disabled</button>
+        <button class="btn btn-secondary"><i class="ti ti-download"></i> Met icoon</button>
+        <button class="btn btn-ghost !p-2.5"><i class="ti ti-dots text-lg"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="section">
+    <h2 class="sec-title">Invoervelden</h2>
+    <div class="panel grid gap-6 sm:grid-cols-2">
+      <div>
+        <label class="lbl">Standaard</label>
+        <input class="input-field" placeholder="Klantnaam" />
+      </div>
+      <div>
+        <label class="lbl">Met hint</label>
+        <input class="input-field" placeholder="naam@bedrijf.nl" />
+        <p class="hint">We sturen de factuur naar dit adres.</p>
+      </div>
+      <div>
+        <label class="lbl">Met icoon</label>
+        <div class="relative">
+          <i class="ti ti-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input class="input-field pl-9" placeholder="Zoeken…" />
+        </div>
+      </div>
+      <div>
+        <label class="lbl">Bedrag</label>
+        <div class="relative">
+          <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
+          <input class="input-field pl-7 tabular-nums" value="1.250,00" />
+        </div>
+      </div>
+      <div>
+        <label class="lbl text-emerald-700">Geldig <span class="font-normal text-slate-400">(input-field modified valid)</span></label>
+        <div class="relative">
+          <input class="input-field modified valid pr-9" value="De Vries Architecten" />
+          <i class="ti ti-circle-check absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500"></i>
+        </div>
+        <p class="hint text-emerald-600">Ziet er goed uit.</p>
+      </div>
+      <div>
+        <label class="lbl text-red-700">Fout <span class="font-normal text-slate-400">(input-field invalid)</span></label>
+        <div class="relative">
+          <input class="input-field invalid pr-9" value="ongeldig-adres" />
+          <i class="ti ti-alert-circle absolute right-3 top-1/2 -translate-y-1/2 text-red-500"></i>
+        </div>
+        <p class="hint text-red-600">Voer een geldig e-mailadres in.</p>
+      </div>
+      <div>
+        <label class="lbl">Disabled</label>
+        <input class="input-field" value="Niet bewerkbaar" disabled />
+      </div>
+      <div>
+        <label class="lbl">Keuzelijst</label>
+        <div class="relative">
+          <select class="input-field appearance-none pr-9">
+            <option>Concept</option><option>Verzonden</option><option>Betaald</option>
+          </select>
+          <i class="ti ti-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        </div>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="lbl">Notitie</label>
+        <textarea class="input-field" rows="3" placeholder="Interne notitie bij deze factuur…"></textarea>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 sm:col-span-2">
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" class="h-4 w-4 rounded border-slate-300 accent-brand-600" checked /> Btw tonen
+        </label>
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <input type="radio" name="r" class="h-4 w-4 border-slate-300 accent-brand-600" checked /> Per e-mail
+        </label>
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <input type="radio" name="r" class="h-4 w-4 border-slate-300 accent-brand-600" /> Per post
+        </label>
+        <label class="inline-flex cursor-pointer items-center gap-3 text-sm text-slate-700">
+          <input type="checkbox" class="peer sr-only" checked />
+          <span class="relative h-6 w-11 rounded-full bg-slate-200 transition peer-checked:bg-brand-600 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></span>
+          Automatische herinnering
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section class="section">
+    <h2 class="sec-title">Kaarten</h2>
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-center justify-between">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><i class="ti ti-coins text-xl"></i></span>
+          <span class="badge badge-success"><i class="ti ti-trending-up text-sm"></i> 12,5%</span>
+        </div>
+        <p class="mt-4 text-sm text-slate-500">Totale omzet</p>
+        <p class="mt-1 font-display text-2xl font-bold tabular-nums text-slate-900">€ 48.250</p>
+      </div>
+      <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white sm:col-span-2">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
+          <h3 class="font-display text-sm font-semibold text-slate-900">Kaart met header</h3>
+          <button class="btn btn-ghost btn-sm">Actie</button>
+        </div>
+        <div class="px-5 py-4 text-sm text-slate-600">Inhoud van de kaart. Combineer met tabellen, lijsten of formulieren.</div>
+        <div class="border-t border-slate-100 bg-slate-50/60 px-5 py-3 text-right">
+          <button class="btn btn-secondary btn-sm">Annuleren</button>
+          <button class="btn btn-primary btn-sm">Opslaan</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BADGES -->
+  <section class="section">
+    <h2 class="sec-title">Statusbadges</h2>
+    <div class="panel flex flex-wrap gap-3">
+      <span class="badge badge-success"><i class="ti ti-circle-check text-sm"></i> Betaald</span>
+      <span class="badge badge-info"><i class="ti ti-send text-sm"></i> Verzonden</span>
+      <span class="badge badge-neutral"><i class="ti ti-file text-sm"></i> Concept</span>
+      <span class="badge badge-danger"><i class="ti ti-alert-triangle text-sm"></i> Achterstallig</span>
+      <span class="badge badge-warning"><i class="ti ti-clock text-sm"></i> In behandeling</span>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <section class="section">
+    <h2 class="sec-title">Meldingen &amp; waarschuwingen</h2>
+    <div class="space-y-3">
+      <div class="alert alert-info">
+        <i class="ti ti-info-circle mt-0.5 text-lg"></i>
+        <div><p class="alert-title">Info</p><p>Je proefperiode loopt nog 12 dagen.</p></div>
+      </div>
+      <div class="alert alert-success">
+        <i class="ti ti-circle-check mt-0.5 text-lg"></i>
+        <div><p class="alert-title">Gelukt</p><p>Factuur #INV-2041 is verzonden naar de klant.</p></div>
+      </div>
+      <div class="alert alert-warning">
+        <i class="ti ti-alert-triangle mt-0.5 text-lg"></i>
+        <div class="flex-1"><p class="alert-title">Let op</p><p>Drie facturen verlopen deze week.</p></div>
+        <button class="opacity-70 hover:opacity-100"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="alert alert-danger">
+        <i class="ti ti-alert-circle mt-0.5 text-lg"></i>
+        <div><p class="alert-title">Fout</p><p>Betaling kon niet worden verwerkt. Probeer het opnieuw.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AVATARS + DROPDOWN -->
+  <section class="section">
+    <h2 class="sec-title">Avatars &amp; dropdown</h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="panel">
+        <div class="flex items-center gap-4">
+          <span class="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-xs font-semibold text-white">TV</span>
+          <span class="grid h-10 w-10 place-items-center rounded-full bg-accent-500 text-sm font-semibold text-white">DA</span>
+          <span class="relative grid h-12 w-12 place-items-center rounded-full bg-brand-100 text-base font-semibold text-brand-700">
+            BJ <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+          </span>
+          <div class="flex -space-x-2">
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-brand-600 text-xs font-semibold text-white ring-2 ring-white">TV</span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-accent-500 text-xs font-semibold text-white ring-2 ring-white">DA</span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-slate-300 text-xs font-semibold text-slate-700 ring-2 ring-white">+3</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="mb-3 text-xs text-slate-400">Dropdown — open/dicht via <code class="rounded bg-slate-100 px-1">.is-active</code> (klik op de knop)</p>
+        <div class="dropdown inline-block" data-dd>
+          <button data-dd-toggle class="btn btn-secondary btn-sm">Menu <i class="ti ti-chevron-down"></i></button>
+          <div data-dd-panel class="dropdown-panel is-active left-0 right-auto">
+            <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+              <span class="grid h-10 w-10 place-items-center rounded-full bg-brand-600 text-sm font-semibold text-white">TV</span>
+              <span><span class="block text-sm font-medium text-slate-900">Tom Vermeer</span><span class="block text-xs text-slate-400">tom@studio.nl</span></span>
+            </div>
+            <a href="#" class="dropdown-item is-active"><i class="ti ti-user text-lg"></i> Mijn profiel</a>
+            <a href="#" class="dropdown-item"><i class="ti ti-settings text-lg"></i> Instellingen</a>
+            <div class="border-t border-slate-100"><button class="dropdown-item dropdown-item-danger"><i class="ti ti-logout text-lg"></i> Uitloggen</button></div>
+          </div>
+        </div>
+        <div class="h-52"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABS + PAGINATION -->
+  <section class="section">
+    <h2 class="sec-title">Tabs, breadcrumb &amp; paginering</h2>
+    <div class="panel space-y-5">
+      <nav class="flex items-center gap-2 text-sm text-slate-400">
+        <a href="#" class="hover:text-slate-600">Facturen</a><i class="ti ti-chevron-right text-xs"></i>
+        <a href="#" class="hover:text-slate-600">2026</a><i class="ti ti-chevron-right text-xs"></i>
+        <span class="font-medium text-slate-700">#INV-2041</span>
+      </nav>
+      <div class="flex gap-1 border-b border-slate-200">
+        <a class="-mb-px border-b-2 border-accent-500 px-4 py-2.5 text-sm font-semibold text-slate-900">Overzicht</a>
+        <a class="-mb-px border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800">Regels</a>
+        <a class="-mb-px border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800">Historie</a>
+      </div>
+      <div class="flex items-center gap-1">
+        <button class="btn btn-secondary btn-sm !px-2.5"><i class="ti ti-chevron-left"></i></button>
+        <button class="btn btn-sm bg-brand-600 text-white">1</button>
+        <button class="btn btn-secondary btn-sm">2</button>
+        <button class="btn btn-secondary btn-sm">3</button>
+        <span class="px-1 text-slate-400">…</span>
+        <button class="btn btn-secondary btn-sm">9</button>
+        <button class="btn btn-secondary btn-sm !px-2.5"><i class="ti ti-chevron-right"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLE -->
+  <section class="section">
+    <h2 class="sec-title">Tabel</h2>
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-100 bg-slate-50/60 text-xs uppercase tracking-wide text-slate-400">
+            <th class="px-6 py-3 font-semibold">Factuur</th><th class="px-6 py-3 font-semibold">Klant</th>
+            <th class="px-6 py-3 text-right font-semibold">Bedrag</th><th class="px-6 py-3 font-semibold">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr class="hover:bg-slate-50/70"><td class="px-6 py-4 font-semibold tabular-nums text-slate-900">#INV-2041</td><td class="px-6 py-4 text-slate-700">De Vries Architecten</td><td class="px-6 py-4 text-right font-semibold tabular-nums">€ 4.250</td><td class="px-6 py-4"><span class="badge badge-info">Verzonden</span></td></tr>
+          <tr class="hover:bg-slate-50/70"><td class="px-6 py-4 font-semibold tabular-nums text-slate-900">#INV-2040</td><td class="px-6 py-4 text-slate-700">Bakkerij Janssen</td><td class="px-6 py-4 text-right font-semibold tabular-nums">€ 880</td><td class="px-6 py-4"><span class="badge badge-success">Betaald</span></td></tr>
+          <tr class="hover:bg-slate-50/70"><td class="px-6 py-4 font-semibold tabular-nums text-slate-900">#INV-2039</td><td class="px-6 py-4 text-slate-700">Coöperatie Noord</td><td class="px-6 py-4 text-right font-semibold tabular-nums">€ 12.400</td><td class="px-6 py-4"><span class="badge badge-danger">Achterstallig</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- EMPTY STATE + PROGRESS -->
+  <section class="section">
+    <h2 class="sec-title">Lege staat &amp; voortgang</h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="panel grid place-items-center py-10 text-center">
+        <span class="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-400"><i class="ti ti-file-off text-2xl"></i></span>
+        <p class="mt-3 text-sm font-medium text-slate-700">Nog geen facturen</p>
+        <p class="text-sm text-slate-400">Maak je eerste factuur aan om te beginnen.</p>
+        <button class="btn btn-primary btn-sm mt-4"><i class="ti ti-plus"></i> Nieuwe factuur</button>
+      </div>
+      <div class="panel space-y-4">
+        <div>
+          <div class="mb-1 flex justify-between text-xs text-slate-500"><span>Betaald</span><span class="tabular-nums">64%</span></div>
+          <div class="h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-brand-500" style="width:64%"></div></div>
+        </div>
+        <div>
+          <div class="mb-1 flex justify-between text-xs text-slate-500"><span>Openstaand</span><span class="tabular-nums">26%</span></div>
+          <div class="h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-accent-400" style="width:26%"></div></div>
+        </div>
+        <div>
+          <div class="mb-1 flex justify-between text-xs text-slate-500"><span>Achterstallig</span><span class="tabular-nums">10%</span></div>
+          <div class="h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-red-500" style="width:10%"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="mt-10 text-center text-xs text-slate-400">Facturio · kitchen sink · Blazor + Tailwind</p>
+</div>
+
+@code {
+    
+}

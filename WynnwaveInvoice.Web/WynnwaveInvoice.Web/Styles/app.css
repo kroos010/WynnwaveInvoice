@@ -1,1 +1,125 @@
 ﻿@import "tailwindcss";
+
+@source "../**/*.{razor,html,cshtml}";              /* server-project  */
+@source "../../Facturio.Client/**/*.{razor,html}";  /* client (WASM)   */
+
+@theme {
+    --font-sans:    "Public Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+
+    --color-brand-50:  #eff5ff;
+    --color-brand-100: #dbe8fe;
+    --color-brand-200: #bfd6fe;
+    --color-brand-300: #93bbfd;
+    --color-brand-400: #6098fa;
+    --color-brand-500: #3b7bf6;
+    --color-brand-600: #2563eb;
+    --color-brand-700: #1d4fd7;
+    --color-brand-800: #1e3fae;
+    --color-brand-900: #1e3a8a;
+    --color-brand-950: #0b1a33;
+
+    --color-accent-50:  #fff6ed;
+    --color-accent-100: #ffead5;
+    --color-accent-200: #fed7aa;
+    --color-accent-300: #fdba74;
+    --color-accent-400: #fb923c;
+    --color-accent-500: #f97316;
+    --color-accent-600: #ea580c;
+    --color-accent-700: #c2410c;
+    --color-accent-800: #9a3412;
+    --color-accent-900: #7c2d12;
+
+    --color-canvas: #f5f7fb;
+}
+
+@layer components {
+    .input-field {
+        @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5
+        text-sm text-slate-900 shadow-sm transition
+        placeholder:text-slate-400;
+    }
+    .input-field:focus {
+        @apply border-brand-500 outline-none ring-2 ring-brand-500/30;
+    }
+    .input-field:disabled {
+        @apply cursor-not-allowed bg-slate-50 text-slate-400;
+    }
+    
+    .nav-link {
+        @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm
+        font-medium text-slate-400 transition hover:bg-white/5 hover:text-white;
+    }
+    .nav-link-active {
+        @apply bg-white/10 text-white;
+    }
+    .nav-link-active::before {
+        content: "";
+        @apply absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-accent-500;
+    }
+    .nav-link-active i { @apply text-accent-400; }
+    
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+        text-sm font-semibold transition active:scale-[.98]
+        disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .btn-primary   { @apply bg-accent-500 text-white hover:bg-accent-600; }
+    .btn-secondary { @apply border border-slate-200 bg-white text-slate-600 hover:bg-slate-50; }
+    .btn-outline   { @apply border border-brand-600 text-brand-700 hover:bg-brand-50; }
+    .btn-ghost     { @apply text-slate-600 hover:bg-slate-100; }
+    .btn-danger    { @apply bg-red-500 text-white hover:bg-red-600; }
+    .btn-sm        { @apply px-3 py-1.5 text-xs; }
+    
+    .dropdown { @apply relative; }
+    .dropdown-panel {
+        @apply invisible absolute right-0 top-full z-20 mt-2 w-72 origin-top-right
+        scale-95 overflow-hidden rounded-xl border border-slate-200 bg-white
+        opacity-0 shadow-[0_10px_30px_-8px_rgb(15_23_42_/_0.18)]
+        transition duration-150 ease-out;
+    }
+    .dropdown-panel.is-active { @apply visible scale-100 opacity-100; }
+
+    .dropdown-item {
+        @apply flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm
+        text-slate-600 transition hover:bg-slate-50 hover:text-slate-900;
+    }
+    .dropdown-item.is-active { @apply bg-brand-50 text-brand-700; }
+    .dropdown-item-danger { @apply text-red-600 hover:bg-red-50 hover:text-red-700; }
+    
+    .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset; }
+    .badge-success { @apply bg-emerald-50 text-emerald-700 ring-emerald-600/20; }
+    .badge-info    { @apply bg-brand-50 text-brand-700 ring-brand-600/20; }
+    .badge-neutral { @apply bg-slate-100 text-slate-600 ring-slate-500/20; }
+    .badge-warning { @apply bg-accent-50 text-accent-700 ring-accent-600/20; }
+    .badge-danger  { @apply bg-red-50 text-red-700 ring-red-600/20; }
+    
+    .alert { @apply flex items-start gap-3 rounded-xl border p-4 text-sm; }
+    .alert-info    { @apply border-brand-200 bg-brand-50 text-brand-700; }
+    .alert-success { @apply border-emerald-200 bg-emerald-50 text-emerald-700; }
+    .alert-warning { @apply border-accent-200 bg-accent-50 text-accent-700; }
+    .alert-danger  { @apply border-red-200 bg-red-50 text-red-700; }
+    .alert-title   { @apply font-semibold; }
+    
+    .panel { @apply rounded-2xl border border-slate-200 bg-white p-5; }
+    .lbl   { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+    .hint  { @apply mt-1.5 text-xs text-slate-400; }
+    .section   { @apply mb-10; }
+    .sec-title { @apply mb-3 font-display text-sm font-semibold uppercase tracking-wider text-slate-400; }
+}
+
+.input-field.modified.valid       { border-color: #34d399; }
+.input-field.invalid              { border-color: #ef4444; }
+.input-field.invalid:focus        { box-shadow: 0 0 0 2px rgb(239 68 68 / 0.30); }
+
+.validation-message               { color: #ef4444; font-size: 0.8rem; margin-top: 0.25rem; }
+
+#blazor-error-ui {
+    background: #fff7ed;
+    color: #7c2d12;
+    border-top: 1px solid #fed7aa;
+    bottom: 0; box-shadow: 0 -1px 2px rgb(0 0 0 / 0.06);
+    display: none; left: 0; padding: 0.75rem 1.25rem; position: fixed;
+    width: 100%; z-index: 1000; font-size: 0.875rem;
+}
+#blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: 1.25rem; top: 0.6rem; }

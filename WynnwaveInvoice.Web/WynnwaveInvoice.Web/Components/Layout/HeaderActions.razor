@@ -1,0 +1,95 @@
+@* Facturio/Components/Layout/HeaderActions.razor
+   ---------------------------------------------------------------------------
+   De meldingen-bel en profielfoto met dropdowns. Dit is een interactief
+   "eiland" binnen de statische SSR-layout; geef het in MainLayout een render
+   mode mee:  <HeaderActions @rendermode="InteractiveServer" />
+
+   De open-staat wordt gestuurd door .is-active op .dropdown-panel
+   (zie Styles/app.css). Buiten de dropdown klikken sluit alles via de overlay.
+   --------------------------------------------------------------------------- *@
+
+@if (_notifOpen || _profileOpen)
+{
+    <div class="fixed inset-0 z-10" @onclick="CloseAll"></div>
+}
+
+<div class="ml-auto flex items-center gap-2">
+
+    @* ---------- Meldingen ---------- *@
+    <div class="dropdown">
+        <button @onclick="ToggleNotifications"
+                class="relative grid h-9 w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 @(_notifOpen ? "bg-slate-100 text-slate-700" : "")">
+            <i class="ti ti-bell text-xl"></i>
+            <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent-500 ring-2 ring-white"></span>
+        </button>
+
+        <div class="dropdown-panel w-80 @(_notifOpen ? "is-active" : "")">
+            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                <p class="font-display text-sm font-semibold text-slate-900">Meldingen</p>
+                <button class="text-xs font-medium text-brand-600 hover:text-brand-700">Alles gelezen</button>
+            </div>
+            <div class="max-h-80 overflow-y-auto">
+                @foreach (var n in _notifications)
+                {
+                    <button class="dropdown-item @(n.Unread ? "is-active" : "")">
+                        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full @n.Tint">
+                            <i class="ti @n.Icon"></i>
+                        </span>
+                        <span class="min-w-0">
+                            <span class="block truncate text-slate-700">@n.Text</span>
+                            <span class="block text-xs text-slate-400">@n.Time</span>
+                        </span>
+                    </button>
+                }
+            </div>
+            <a href="meldingen" class="block border-t border-slate-100 px-4 py-2.5 text-center text-sm font-medium text-brand-600 hover:bg-slate-50">
+                Bekijk alle meldingen
+            </a>
+        </div>
+    </div>
+
+    @* ---------- Profiel ---------- *@
+    <div class="dropdown">
+        <button @onclick="ToggleProfile"
+                class="flex items-center gap-2 rounded-lg p-1 pr-2 transition hover:bg-slate-100 @(_profileOpen ? "bg-slate-100" : "")">
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-brand-600 text-sm font-semibold text-white">TV</span>
+            <i class="ti ti-chevron-down text-base text-slate-400"></i>
+        </button>
+
+        <div class="dropdown-panel @(_profileOpen ? "is-active" : "")">
+            <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+                <span class="grid h-10 w-10 place-items-center rounded-full bg-brand-600 text-sm font-semibold text-white">TV</span>
+                <span class="min-w-0">
+                    <span class="block truncate text-sm font-medium text-slate-900">Tom Vermeer</span>
+                    <span class="block truncate text-xs text-slate-400">tom@studio.nl</span>
+                </span>
+            </div>
+            <div class="py-1">
+                <a href="profiel" class="dropdown-item"><i class="ti ti-user text-lg"></i> Mijn profiel</a>
+                <a href="instellingen" class="dropdown-item"><i class="ti ti-settings text-lg"></i> Instellingen</a>
+                <a href="facturatie" class="dropdown-item"><i class="ti ti-credit-card text-lg"></i> Facturatie</a>
+            </div>
+            <div class="border-t border-slate-100 py-1">
+                <button class="dropdown-item dropdown-item-danger"><i class="ti ti-logout text-lg"></i> Uitloggen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _notifOpen;
+    private bool _profileOpen;
+
+    private void ToggleNotifications() { _notifOpen = !_notifOpen; _profileOpen = false; }
+    private void ToggleProfile()       { _profileOpen = !_profileOpen; _notifOpen = false; }
+    private void CloseAll()            { _notifOpen = false; _profileOpen = false; }
+
+    private record Notif(string Text, string Time, string Icon, string Tint, bool Unread);
+
+    private readonly Notif[] _notifications =
+    {
+        new("Factuur #INV-2040 is betaald", "10 min geleden", "ti-circle-check", "bg-emerald-50 text-emerald-600", true),
+        new("Factuur #INV-2039 is achterstallig", "2 uur geleden", "ti-alert-triangle", "bg-red-50 text-red-600", true),
+        new("Nieuwe klant: Studio Lumen", "Gisteren", "ti-user-plus", "bg-brand-50 text-brand-600", false),
+    };
+}

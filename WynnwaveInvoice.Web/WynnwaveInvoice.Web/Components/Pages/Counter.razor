@@ -1,0 +1,77 @@
+@rendermode InteractiveServer
+
+@page "/clicker"
+@using System.ComponentModel.DataAnnotations
+@using WynnwaveInvoice.Web.Client.Shared
+@* <h3>Counter</h3> *@
+@* *@
+@* <h1>Amount clicked @amountClicked</h1> *@
+@* *@
+@* <button @onclick="IncrementAmount">+</button> *@
+@* <button @onclick="DecrementAmount">-</button> *@
+
+<div class="mx-auto max-w-lg">
+   <h1 class="mb-1 font-display text-2xl font-semibold tracking-tight text-slate-900">Nieuwe factuur</h1>
+   <p class="mb-6 text-sm text-slate-500">Velden valideren tijdens het typen, maar pas nadat je ze hebt aangeraakt.</p>
+
+   <EditForm Model="_model" OnValidSubmit="Opslaan" OnInvalidSubmit="ToonAlleFouten" class="panel space-y-4">
+      <DataAnnotationsValidator/>
+
+      <TextInput Label="Klant" @bind-Value="_model.Klant" Placeholder="Bijv. Studio Lumen"/>
+      <TextInput Label="E-mail" Type="email" @bind-Value="_model.Email" Placeholder="naam@bedrijf.nl"/>
+      <TextInput Label="Factuurnummer" @bind-Value="_model.Nummer" Hint="Formaat: INV-1234"/>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+         <button type="button" class="btn btn-secondary">Annuleren</button>
+         <button type="submit" class="btn btn-primary">Opslaan</button>
+      </div>
+
+      @if (_opgeslagen)
+      {
+         <div class="alert alert-success">
+            <i class="ti ti-circle-check mt-0.5 text-lg"></i>
+            <div><p class="alert-title">Opgeslagen</p>
+               <p>De factuur is aangemaakt.</p></div>
+         </div>
+      }
+   </EditForm>
+</div>
+
+@code {
+   // private int amountClicked = 0;
+   //
+   // private void IncrementAmount() => amountClicked++;
+   // private void DecrementAmount() => amountClicked--;
+
+   private readonly NieuweFactuur _model = new();
+   private bool _opgeslagen;
+
+   private void Opslaan()
+   {
+      // Hier zou je de factuur naar je API/database sturen.
+      _opgeslagen = true;
+   }
+
+   // Markeer elk veld als 'modified' zodat onaangeraakte (lege) verplichte
+   // velden hun foutmelding tonen na een submit-poging.
+   private void ToonAlleFouten(EditContext ctx)
+   {
+      foreach (var prop in typeof(NieuweFactuur).GetProperties())
+         ctx.NotifyFieldChanged(ctx.Field(prop.Name));
+   }
+
+   public class NieuweFactuur
+   {
+      [Required(ErrorMessage = "Klantnaam is verplicht.")]
+      public string? Klant { get; set; }
+
+      [Required(ErrorMessage = "E-mail is verplicht.")]
+      [EmailAddress(ErrorMessage = "Voer een geldig e-mailadres in.")]
+      public string? Email { get; set; }
+
+      [Required(ErrorMessage = "Factuurnummer is verplicht.")]
+      [RegularExpression(@"INV-\d{4}", ErrorMessage = "Gebruik het formaat INV-1234.")]
+      public string? Nummer { get; set; }
+   }
+
+}

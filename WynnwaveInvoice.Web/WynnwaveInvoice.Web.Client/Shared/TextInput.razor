@@ -1,0 +1,49 @@
+@inherits InputText
+
+<div class="space-y-1.5">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <label class="lbl" for="@_id">@Label</label>
+    }
+    <input id="@_id"
+           type="@Type"
+           placeholder="@Placeholder"
+           @attributes="AdditionalAttributes"
+           class="input-field @StateClass"
+           @bind="CurrentValueAsString"
+           @bind:event="oninput"/>
+    @if (!string.IsNullOrWhiteSpace(Hint))
+    {
+        <p class="hint">@Hint</p>
+    }
+    @if (IsDirty)
+    {
+        <ValidationMessage For="ValueExpression"/>
+    }
+</div>
+
+@code {
+    private readonly string _id = $"ti_{Guid.NewGuid():N}";
+    private FieldIdentifier _field;
+
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? Hint { get; set; }
+    [Parameter] public string Type { get; set; } = "text";
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (ValueExpression is not null)
+            _field = FieldIdentifier.Create(ValueExpression);
+    }
+
+    // 'dirty' = het veld is door de gebruiker (of door submit) aangeraakt.
+    private bool IsDirty => ValueExpression is not null && EditContext.IsModified(_field);
+
+    // Geen kleur tot het veld dirty is; daarna groen/rood op basis van fouten.
+    private string StateClass =>
+        !IsDirty ? string.Empty
+        : EditContext.GetValidationMessages(_field).Any() ? "modified invalid" : "modified valid";
+
+}

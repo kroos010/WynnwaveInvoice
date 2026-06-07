@@ -12,6 +12,15 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Content Update="package-lock.json">
+	    <DependentUpon>package.json</DependentUpon>
+	  </Content>
+	  <Content Update="appsettings.Development.json">
+	    <DependentUpon>appsettings.json</DependentUpon>
+	  </Content>
+	</ItemGroup>
+
 	<Target Name="Tailwind" BeforeTargets="Build">
 		<Exec Command="npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --minify" />
 	</Target>
