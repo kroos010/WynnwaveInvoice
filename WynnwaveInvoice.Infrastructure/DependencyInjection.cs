@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using WynnwaveInvoice.Domain.Invoices;
+using WynnwaveInvoice.Infrastructure.Invoices;
 using WynnwaveInvoice.Infrastructure.Persistence;
 
 namespace WynnwaveInvoice.Infrastructure;
@@ -22,7 +24,7 @@ public static class DependencyInjection
                        );
         });
 
-        //services.AddScoped<IInvoiceNumberGenerator, InvoiceNumberGenerator>();
+        services.AddScoped<IInvoiceNumberGenerator, InvoiceNumberGenerator>();
 
         return services;
     }

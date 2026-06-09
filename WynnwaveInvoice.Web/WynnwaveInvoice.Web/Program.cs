@@ -1,9 +1,12 @@
 using WynnwaveInvoice.Infrastructure;
+using WynnwaveInvoice.Web;
 using WynnwaveInvoice.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("WynnwaveInvoiceDatabase")!);
+
+builder.Services.AddScoped<ManualTester, ManualTester>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()

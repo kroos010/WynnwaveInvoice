@@ -33,6 +33,22 @@
     --color-canvas: #f5f7fb;
 }
 
+@layer base {
+    *:focus:not(:focus-visible) {
+        @apply outline-none;
+    }
+}
+
+/* Verwijder focus ring globaal */
+*:focus {
+    outline: none;
+}
+
+/* Of alleen voor niet-keyboard navigatie (betere aanpak voor accessibility) */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
 @layer components {
     .input-field {
         @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5
