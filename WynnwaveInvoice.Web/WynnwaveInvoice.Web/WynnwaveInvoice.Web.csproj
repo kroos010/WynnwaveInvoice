@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -8,8 +8,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\WynnwaveInvoice.Application\WynnwaveInvoice.Application.csproj" />
+		<ProjectReference Include="..\..\WynnwaveInvoice.Infrastructure\WynnwaveInvoice.Infrastructure.csproj" />
 		<ProjectReference Include="..\WynnwaveInvoice.Web.Client\WynnwaveInvoice.Web.Client.csproj" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+		  <!--<PrivateAssets>all</PrivateAssets>-->
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>

@@ -6,7 +6,10 @@
   "scripts": {
     "css:watch": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --watch",
     "css:build": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css",
-    "css:build:prod": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --minify"
+    "css:build:prod": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/app.css --minify",
+    "migrationfull": " dotnet ef migrations add Init -s WynnwaveInvoice.Web/WynnwaveInvoice.Web/WynnwaveInvoice.Web.csproj -p WynnwaveInvoice.Infrastructure/WynnwaveInvoice.Infrastructure.csproj",
+    "migration:add": "dotnet ef migrations add --project WynnwaveInvoice.Infrastructure/WynnwaveInvoice.Infrastructure.csproj --startup-project WynnwaveInvoice.Web/WynnwaveInvoice.Web/WynnwaveInvoice.Web.csproj",
+    "migration:run": "dotnet ef database update --project ../../WynnwaveInvoice.Infrastructure/WynnwaveInvoice.Infrastructure.csproj --startup-project WynnwaveInvoice.Web.csproj"
   },
   "keywords": [],
   "author": "",

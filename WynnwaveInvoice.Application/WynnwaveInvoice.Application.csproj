@@ -6,4 +6,8 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\WynnwaveInvoice.Domain\WynnwaveInvoice.Domain.csproj" />
+	</ItemGroup>
+
 </Project>

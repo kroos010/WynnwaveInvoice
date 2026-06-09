@@ -6,4 +6,15 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="EFCore.NamingConventions" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\WynnwaveInvoice.Application\WynnwaveInvoice.Application.csproj" />
+	  <ProjectReference Include="..\WynnwaveInvoice.Domain\WynnwaveInvoice.Domain.csproj" />
+	</ItemGroup>
+
 </Project>

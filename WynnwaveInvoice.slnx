@@ -3,6 +3,7 @@
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.yml" />
   </Folder>
   <Project Path="WynnwaveInvoice.Application/WynnwaveInvoice.Application.csproj" />
   <Project Path="WynnwaveInvoice.Domain/WynnwaveInvoice.Domain.csproj" />

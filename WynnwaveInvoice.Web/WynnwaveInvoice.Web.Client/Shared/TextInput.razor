@@ -5,20 +5,14 @@
     {
         <label class="lbl" for="@_id">@Label</label>
     }
-    <input id="@_id"
-           type="@Type"
-           placeholder="@Placeholder"
-           @attributes="AdditionalAttributes"
-           class="input-field @StateClass"
-           @bind="CurrentValueAsString"
-           @bind:event="oninput"/>
+    <input id="@_id" type="@Type" placeholder="@Placeholder" @attributes="AdditionalAttributes" class="input-field @StateClass" @bind="CurrentValueAsString" @bind:event="oninput" />
     @if (!string.IsNullOrWhiteSpace(Hint))
     {
         <p class="hint">@Hint</p>
     }
     @if (IsDirty)
     {
-        <ValidationMessage For="ValueExpression"/>
+        <ValidationMessage For="ValueExpression" />
     }
 </div>
 

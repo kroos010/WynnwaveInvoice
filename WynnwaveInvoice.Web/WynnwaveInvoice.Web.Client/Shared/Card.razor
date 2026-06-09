@@ -1,0 +1,56 @@
+﻿@* Facturio.Client/Shared/Card.razor
+   ---------------------------------------------------------------------------
+   Kaart-chrome (rand, hoeken, witte achtergrond) met optionele header- en
+   footer-slots. Zonder header/footer is het simpelweg een gevulde kaart —
+   vergelijkbaar met de .panel-class, maar met ruimte voor structuur.
+
+   <Card>
+       <Header><h3 class="font-display text-sm font-semibold">Titel</h3></Header>
+       Inhoud van de kaart…
+       <Footer>
+           <Button Variant="ButtonVariant.Secondary" Size="ButtonSize.Small">Annuleren</Button>
+           <Button Size="ButtonSize.Small">Opslaan</Button>
+       </Footer>
+   </Card>
+   --------------------------------------------------------------------------- *@
+
+<div @attributes="Extra" class="@CssClass">
+    @if (Header is not null)
+    {
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
+            @Header
+        </div>
+    }
+    @if (ChildContent is not null)
+    {
+        <div class="@(Padded ? "px-5 py-4" : "")">
+            @ChildContent
+        </div>
+    }
+    @if (Footer is not null)
+    {
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/60 px-5 py-3">
+            @Footer
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+    [Parameter] public bool Padded { get; set; } = true;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Extra { get; set; }
+
+    private string CssClass
+    {
+        get
+        {
+            const string baseCls = "overflow-hidden rounded-2xl border border-slate-200 bg-white";
+            var user = Extra is not null && Extra.TryGetValue("class", out var c) ? $" {c}" : "";
+            return baseCls + user;
+        }
+    }
+}

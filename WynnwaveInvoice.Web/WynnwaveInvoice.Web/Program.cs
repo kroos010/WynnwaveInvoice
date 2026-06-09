@@ -1,16 +1,16 @@
-using WynnwaveInvoice.Web.Client.Pages;
+using WynnwaveInvoice.Infrastructure;
 using WynnwaveInvoice.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("WynnwaveInvoiceDatabase")!);
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
