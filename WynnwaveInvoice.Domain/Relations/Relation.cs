@@ -27,6 +27,8 @@ public sealed class Relation : AggregateRoot, IAuditable
         Name = name;
         Address = address;
     }
+    
+    private Relation() { Name = null!; Address = null!; } // EF
 
     public static Relation Create(RelationType type, string name, Address address, string? email = null, string? phone = null, string? vatNumber = null, string? chamberOfCommerceNumber = null, string? iban = null, string? notes = null)
     {
@@ -59,6 +61,25 @@ public sealed class Relation : AggregateRoot, IAuditable
         Raise(new ContactPersonAdded(Id, contactPerson.Id));
         return contactPerson;
     }
+    
+    public void RemoveContactPerson(Guid contactPersonId)
+    {
+        var contact = _contactPersons.FirstOrDefault(c => c.Id == contactPersonId);
+        if (contact is null) return; // idempotent
+        _contactPersons.Remove(contact);
+    }
+
+    public void UpdateContactPerson(Guid contactPersonId, string firstName, string lastName, string? email, string? phone, string? jobTitle, bool isPrimaryContact)
+    {
+        var contact = _contactPersons.FirstOrDefault(c => c.Id == contactPersonId)
+                      ?? throw new DomainException("Contactpersoon niet gevonden.");
+
+        if (isPrimaryContact)
+            foreach (var other in _contactPersons.Where(c => c.Id != contactPersonId))
+                other.UnsetPrimary();
+
+        contact.Update(firstName, lastName, email, phone, jobTitle, isPrimaryContact);
+    }
 
     public void UpdateDetails(string name, Address address, string? email, string? phone, string? vatNumber, string? chamberOfCommerceNumber, string? iban, string? notes)
     {
@@ -74,5 +95,4 @@ public sealed class Relation : AggregateRoot, IAuditable
         Notes = notes;
     }
 
-    private Relation() { Name = null!; Address = null!; } // EF
 }

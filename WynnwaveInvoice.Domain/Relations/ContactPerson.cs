@@ -34,6 +34,19 @@ public sealed class ContactPerson : Entity, IAuditable
 
         return new ContactPerson(relationId, firstName, lastName, email, phone, jobTitle, isPrimaryContact);
     }
+    
+    internal void Update(string firstName, string lastName, string? email, string? phone, string? jobTitle, bool isPrimaryContact)
+    {
+        if (string.IsNullOrWhiteSpace(firstName)) throw new DomainException("Voornaam van de contactpersoon is verplicht.");
+        if (string.IsNullOrWhiteSpace(lastName)) throw new DomainException("Achternaam van de contactpersoon is verplicht.");
+
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+        Phone = phone;
+        JobTitle = jobTitle;
+        IsPrimaryContact = isPrimaryContact;
+    }
 
     internal void UnsetPrimary() => IsPrimaryContact = false;
 }

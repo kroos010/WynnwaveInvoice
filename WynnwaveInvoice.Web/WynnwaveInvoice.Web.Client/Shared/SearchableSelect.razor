@@ -1,0 +1,122 @@
+@* WynnwaveInvoice.Client/Shared/SearchableSelect.razor
+   ---------------------------------------------------------------------------
+   Herbruikbaar, "dom" keuzeveld: je geeft de data + hoe je een item toont, en
+   het meldt de selectie terug via @bind-Value. Pure UI-logica (geen JS), dus
+   het werkt in elke interactieve render mode.
+
+   Gebruik:
+       <SearchableSelect TItem="RelationOption"
+                         Items="_debtors"
+                         @bind-Value="_selected"
+                         ItemText="@(r => r.Name)"
+                         ItemSubText="@(r => r.City)"
+                         Placeholder="Selecteer een klant"
+                         SearchPlaceholder="Zoek op naam…" />
+   --------------------------------------------------------------------------- *@
+@typeparam TItem
+
+<div class="relative">
+    <button type="button"
+            class="input-field flex w-full items-center justify-between text-left @(Value is null ? "text-slate-400" : "text-slate-900")"
+            @onclick="Toggle">
+        <span class="truncate">@(Value is not null ? ItemText(Value) : Placeholder)</span>
+        <i class="ti @(_open ? "ti-chevron-up" : "ti-chevron-down") ml-2 shrink-0 text-slate-400"></i>
+    </button>
+
+    @if (_open)
+    {
+        @* overlay vangt klikken buiten de dropdown *@
+        <div class="fixed inset-0 z-20" @onclick="Close"></div>
+
+        <div class="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_12px_34px_-10px_rgb(15_23_42_/_0.25)]">
+            @* zoek-header: spiegelt de topbar-zoekbalk uit MainLayout *@
+            <div class="relative border-b border-slate-100">
+                <i class="ti ti-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input @ref="_searchInput"
+                       class="w-full bg-transparent py-3 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                       placeholder="@SearchPlaceholder"
+                       @bind="_search"
+                       @bind:event="oninput" />
+            </div>
+
+            <ul class="max-h-72 overflow-y-auto p-1.5">
+                @if (Filtered.Count == 0)
+                {
+                    <li class="px-3 py-6 text-center text-sm text-slate-400">@EmptyText</li>
+                }
+                else
+                {
+                    @foreach (var item in Filtered)
+                    {
+                        var selected = EqualityComparer<TItem>.Default.Equals(item, Value);
+                        <li>
+                            <button type="button"
+                                    class="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left transition hover:bg-slate-100 @(selected ? "bg-brand-50" : "")"
+                                    @onclick="() => SelectAsync(item)">
+                                <span class="min-w-0">
+                                    <span class="block truncate text-sm @(selected ? "font-medium text-brand-700" : "text-slate-700")">@ItemText(item)</span>
+                                    @if (ItemSubText is not null)
+                                    {
+                                        <span class="block truncate text-xs text-slate-400">@ItemSubText(item)</span>
+                                    }
+                                </span>
+                                @if (selected)
+                                {
+                                    <i class="ti ti-check shrink-0 text-brand-600"></i>
+                                }
+                            </button>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference _searchInput;
+    private bool _open;
+    private bool _focusOnOpen;
+    private string _search = string.Empty;
+
+    [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = Array.Empty<TItem>();
+    [Parameter] public TItem? Value { get; set; }
+    [Parameter] public EventCallback<TItem?> ValueChanged { get; set; }
+    [Parameter, EditorRequired] public Func<TItem, string> ItemText { get; set; } = _ => string.Empty;
+    [Parameter] public Func<TItem, string>? ItemSubText { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Selecteer...";
+    [Parameter] public string SearchPlaceholder { get; set; } = "Zoeken...";
+    [Parameter] public string EmptyText { get; set; } = "Geen resultaten.";
+
+    private IReadOnlyList<TItem> Filtered =>
+        string.IsNullOrWhiteSpace(_search)
+            ? Items
+            : Items.Where(i => ItemText(i).Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+
+    private void Toggle()
+    {
+        _open = !_open;
+        if (_open)
+        {
+            _search = string.Empty;
+            _focusOnOpen = true;
+        }
+    }
+
+    private void Close() => _open = false;
+
+    private async Task SelectAsync(TItem item)
+    {
+        _open = false;
+        await ValueChanged.InvokeAsync(item);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusOnOpen)
+        {
+            _focusOnOpen = false;
+            await _searchInput.FocusAsync();
+        }
+    }
+}

@@ -1,0 +1,250 @@
+@* WynnwaveInvoice.Web/Components/Pages/CreateInvoice.razor
+   Draait InteractiveServer zodat het de Application-services direct kan aanroepen. *@
+@page "/facturen/nieuw"
+@rendermode InteractiveAuto
+@using System.Globalization
+@using WynnwaveInvoice.Application.Invoices
+@using WynnwaveInvoice.Application.Relations
+@using WynnwaveInvoice.Web.Client.Shared
+@using WynnwaveInvoice.Domain.Invoices
+@inject RelationService Relations
+@inject InvoiceService Invoices
+@inject NavigationManager Nav
+
+<PageTitle>Nieuwe factuur</PageTitle>
+<div>
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900">Nieuwe factuur</h1>
+            <p class="mt-1 text-sm text-slate-500">Stel een conceptfactuur samen.</p>
+        </div>
+        <span class="badge badge-neutral"><i class="ti ti-file text-sm"></i> Concept</span>
+    </div>
+
+    <div class="mt-6 grid items-start gap-6 lg:grid-cols-2">
+        <!-- Klant -->
+        <div class="panel">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="font-display text-base font-semibold text-slate-900">Klant</h2>
+                    <p class="mt-0.5 text-sm text-slate-500">Kies de debiteur voor deze factuur.</p>
+                </div>
+                <button type="button" class="inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
+                        @onclick="@(() => Nav.NavigateTo("/klanten/nieuw"))">
+                    <i class="ti ti-plus text-sm"></i> Nieuwe klant
+                </button>
+            </div>
+
+            <div class="mt-5">
+                <label class="lbl">Debiteur</label>
+                <SearchableSelect TItem="RelationOption"
+                                  Items="_debtors"
+                                  @bind-Value="_selected"
+                                  ItemText="@(r => r.Name)"
+                                  ItemSubText="@(r => r.City)"
+                                  Placeholder="Selecteer een klant"
+                                  SearchPlaceholder="Zoek op naam..."
+                                  EmptyText="Geen debiteuren gevonden." />
+            </div>
+
+            @if (_selected is null)
+            {
+                <div class="mt-5 flex items-start gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-5 text-sm text-slate-400">
+                    <i class="ti ti-user-search mt-0.5 text-lg"></i>
+                    <span>Nog geen klant gekozen. De adres- en contactgegevens verschijnen hier zodra je een debiteur selecteert.</span>
+                </div>
+            }
+            else
+            {
+                <dl class="mt-5 grid grid-cols-[7rem_1fr] gap-y-2 rounded-xl bg-slate-50 p-4 text-sm">
+                    <dt class="text-slate-400">Bedrijfsnaam</dt>
+                    <dd class="text-slate-700">@_selected.Name</dd>
+                    <dt class="text-slate-400">Plaats</dt>
+                    <dd class="text-slate-700">@_selected.City</dd>
+                </dl>
+            }
+        </div>
+
+        <!-- Factuurgegevens -->
+        <div class="panel">
+            <h2 class="font-display text-base font-semibold text-slate-900">Factuurgegevens</h2>
+            <p class="mt-0.5 text-sm text-slate-500">Datum, termijn en kenmerken.</p>
+
+            <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                <div>
+                    <label class="lbl">Factuurnummer</label>
+                    <input class="input-field bg-slate-50 text-slate-400" value="Automatisch" disabled />
+                </div>
+                <div>
+                    <label class="lbl">Type</label>
+                    <input class="input-field bg-slate-50 text-slate-400" value="Verkoop" disabled />
+                </div>
+                <div>
+                    <label class="lbl">Factuurdatum</label>
+                    <input type="date" class="input-field" @bind="_invoiceDate" />
+                </div>
+                <div>
+                    <label class="lbl">Betalingstermijn</label>
+                    <select class="input-field" @bind="_paymentTermDays">
+                        <option value="14">14 dagen</option>
+                        <option value="30">30 dagen</option>
+                        <option value="60">60 dagen</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="lbl">Referentie / notitie</label>
+                    <textarea class="input-field" rows="3" @bind="_notes" placeholder="Optioneel"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regels -->
+    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div class="flex items-center justify-between px-6 py-5">
+            <h2 class="font-display text-base font-semibold text-slate-900">Factuurregels</h2>
+            <button class="btn btn-secondary btn-sm" @onclick="AddLine"><i class="ti ti-plus"></i> Regel toevoegen</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full table-fixed text-left text-sm">
+                <thead>
+                    <tr class="border-y border-slate-100 bg-slate-50/60 text-xs uppercase tracking-wide text-slate-400">
+                        <th class="w-24 py-3 pl-6 pr-3 text-left font-semibold">Aantal</th>
+                        <th class="w-[40%] py-3 px-3 text-left font-semibold">Omschrijving</th>
+                        <th class="w-28 py-3 px-3 text-left font-semibold">Btw</th>
+                        <th class="w-32 py-3 px-3 text-left font-semibold">Prijs p/e</th>
+                        <th class="w-36 py-3 px-3 text-right font-semibold">Regeltotaal</th>
+                        <th class="w-14 py-3 pl-3 pr-6"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var line in _lines)
+                    {
+                        <tr>
+                            <td class="py-4 pl-6 pr-3"><input type="number" step="1" class="input-field w-full text-right" @bind="line.Quantity" /></td>
+                            <td class="px-3 py-4"><input class="input-field w-full" placeholder="Omschrijving" @bind="line.Description" /></td>
+                            <td class="px-3 py-4">
+                                <select class="input-field w-full" @bind="line.VatPercentage">
+                                    <option value="21">21%</option>
+                                    <option value="9">9%</option>
+                                    <option value="0">0%</option>
+                                </select>
+                            </td>
+                            <td class="px-3 py-4">
+                                <div class="relative">
+                                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
+                                    <input type="number" step="0.01" class="input-field w-full pl-7 text-right" @bind="line.UnitPrice" />
+                                </div>
+                            </td>
+                            <td class="px-3 py-4 text-right font-medium tabular-nums text-slate-900">@Euro(LineTotal(line))</td>
+                            <td class="py-4 pl-3 pr-6 text-right">
+                                <button class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-red-600" @onclick="() => RemoveLine(line)">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    @if (_lines.Count == 0)
+                    {
+                        <tr><td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">Nog geen regels. Klik op "Regel toevoegen".</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-end border-t border-slate-100 py-5 pl-6 pr-[68px]">
+            <dl class="w-64 space-y-2 text-sm">
+                <div class="flex justify-between"><dt class="text-slate-500">Subtotaal</dt><dd class="tabular-nums text-slate-700">@Euro(Subtotal)</dd></div>
+                <div class="flex justify-between"><dt class="text-slate-500">Btw</dt><dd class="tabular-nums text-slate-700">@Euro(VatTotal)</dd></div>
+                <div class="flex justify-between border-t border-slate-100 pt-2 text-base font-semibold text-slate-900"><dt>Totaal</dt><dd class="tabular-nums">@Euro(Total)</dd></div>
+            </dl>
+        </div>
+    </div>
+
+    @if (_error is not null)
+    {
+        <div class="alert alert-danger mt-6"><i class="ti ti-alert-circle mt-0.5 text-lg"></i><div><p class="alert-title">Mislukt</p><p>@_error</p></div></div>
+    }
+    @if (_savedId is not null)
+    {
+        <div class="alert alert-success mt-6"><i class="ti ti-circle-check mt-0.5 text-lg"></i><div><p class="alert-title">Opgeslagen</p><p>Conceptfactuur aangemaakt (@_savedId).</p></div></div>
+    }
+
+    <div class="mt-6 flex items-center justify-end gap-2">
+        <button class="btn btn-secondary" @onclick="@(() => Nav.NavigateTo("/facturen"))">Annuleren</button>
+        <button class="btn btn-primary" @onclick="Save" disabled="@_busy">
+            @if (_busy) { <i class="ti ti-loader-2 animate-spin"></i> }
+            <i class="ti ti-device-floppy"></i> Opslaan als concept
+        </button>
+    </div>
+</div>
+
+@code {
+    private static readonly CultureInfo Nl = CultureInfo.GetCultureInfo("nl-NL");
+
+    private IReadOnlyList<RelationOption> _debtors = Array.Empty<RelationOption>();
+    private RelationOption? _selected;
+    private DateOnly _invoiceDate = DateOnly.FromDateTime(DateTime.Today);
+    private int _paymentTermDays = 30;
+    private string? _notes;
+    private readonly List<LineInput> _lines = new();
+
+    private bool _busy;
+    private string? _error;
+    private Guid? _savedId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _debtors = await Relations.GetSelectableAsync();
+        AddLine();
+    }
+
+    private void AddLine() => _lines.Add(new LineInput());
+    private void RemoveLine(LineInput line) => _lines.Remove(line);
+
+    private static decimal LineSub(LineInput l) => l.Quantity * l.UnitPrice;
+    private static decimal LineTotal(LineInput l) => LineSub(l) * (1 + l.VatPercentage / 100m);
+    private decimal Subtotal => _lines.Sum(LineSub);
+    private decimal VatTotal => _lines.Sum(l => LineSub(l) * (l.VatPercentage / 100m));
+    private decimal Total => Subtotal + VatTotal;
+
+    private static string Euro(decimal value) => value.ToString("C", Nl);
+
+    private async Task Save()
+    {
+        _error = null;
+        _savedId = null;
+
+        if (_selected is null) { _error = "Kies eerst een klant."; return; }
+
+        var lines = _lines
+            .Where(l => !string.IsNullOrWhiteSpace(l.Description))
+            .Select(l => new CreateInvoiceLine(l.Description, l.Quantity, l.UnitPrice, l.VatPercentage))
+            .ToList();
+
+        if (lines.Count == 0) { _error = "Voeg minimaal een regel met omschrijving toe."; return; }
+
+        _busy = true;
+        try
+        {
+            _savedId = await Invoices.CreateDraftAsync(new CreateDraftInvoiceRequest(
+                _selected.Id, InvoiceType.Sales, _invoiceDate, _paymentTermDays, lines));
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private sealed class LineInput
+    {
+        public decimal Quantity { get; set; } = 1;
+        public string Description { get; set; } = string.Empty;
+        public decimal VatPercentage { get; set; } = 21m;
+        public decimal UnitPrice { get; set; }
+    }
+}

@@ -1,0 +1,98 @@
+@* WynnwaveInvoice.Web/Components/Pages/Relations.razor *@
+@page "/klanten"
+@rendermode InteractiveServer
+@using WynnwaveInvoice.Application.Relations
+@using WynnwaveInvoice.Domain.Relations
+@inject RelationService RelationService
+@inject NavigationManager Nav
+
+<PageTitle>Klanten</PageTitle>
+
+<div>
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900">Klanten</h1>
+            <p class="mt-1 text-sm text-slate-500">Beheer je debiteuren, crediteuren en contactpersonen.</p>
+        </div>
+        <button class="btn btn-primary" @onclick="@(() => Nav.NavigateTo("/klanten/nieuw"))">
+            <i class="ti ti-plus"></i> Nieuwe klant
+        </button>
+    </div>
+
+    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        @if (_loading)
+        {
+            <div class="px-6 py-12 text-center text-sm text-slate-400">Laden…</div>
+        }
+        else if (_relations.Count == 0)
+        {
+            <div class="flex flex-col items-center gap-2 px-6 py-16 text-center">
+                <i class="ti ti-users-group text-3xl text-slate-300"></i>
+                <p class="text-sm font-medium text-slate-600">Nog geen klanten</p>
+                <p class="max-w-sm text-sm text-slate-400">Voeg je eerste debiteur of crediteur toe om facturen te kunnen opstellen.</p>
+                <button class="btn btn-primary mt-2" @onclick="@(() => Nav.NavigateTo("/klanten/nieuw"))">
+                    <i class="ti ti-plus"></i> Nieuwe klant
+                </button>
+            </div>
+        }
+        else
+        {
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/60 text-xs uppercase tracking-wide text-slate-400">
+                        <th class="px-6 py-3 font-semibold">Naam</th>
+                        <th class="px-3 py-3 font-semibold">Type</th>
+                        <th class="px-3 py-3 font-semibold">Plaats</th>
+                        <th class="px-3 py-3 font-semibold">E-mail</th>
+                        <th class="px-3 py-3 font-semibold">Contactpersonen</th>
+                        <th class="px-6 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var r in _relations)
+                    {
+                        <tr class="cursor-pointer transition hover:bg-slate-50" @onclick="@(() => Edit(r.Id))">
+                            <td class="px-6 py-3.5 font-medium text-slate-900">@r.Name</td>
+                            <td class="px-3 py-3.5"><span class="badge @TypeBadge(r.Type)">@TypeLabel(r.Type)</span></td>
+                            <td class="px-3 py-3.5 text-slate-600">@r.City</td>
+                            <td class="px-3 py-3.5 text-slate-600">@(string.IsNullOrWhiteSpace(r.Email) ? "—" : r.Email)</td>
+                            <td class="px-3 py-3.5 text-slate-600">@r.ContactCount</td>
+                            <td class="px-6 py-3.5 text-right">
+                                <i class="ti ti-chevron-right text-slate-300"></i>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    private IReadOnlyList<RelationListItem> _relations = Array.Empty<RelationListItem>();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _relations = await RelationService.GetAllAsync();
+        _loading = false;
+    }
+
+    private void Edit(Guid id) => Nav.NavigateTo($"/klanten/{id}");
+
+    private static string TypeLabel(RelationType type) => type switch
+    {
+        RelationType.Debtor => "Debiteur",
+        RelationType.Creditor => "Crediteur",
+        RelationType.Both => "Beide",
+        _ => type.ToString()
+    };
+
+    private static string TypeBadge(RelationType type) => type switch
+    {
+        RelationType.Debtor => "badge-info",
+        RelationType.Creditor => "badge-warning",
+        RelationType.Both => "badge-neutral",
+        _ => "badge-neutral"
+    };
+}

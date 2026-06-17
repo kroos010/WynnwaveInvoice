@@ -1,0 +1,338 @@
+@* WynnwaveInvoice.Web/Components/Pages/RelationEdit.razor *@
+@page "/klanten/nieuw"
+@page "/klanten/{Id:guid}"
+@rendermode InteractiveServer
+@using WynnwaveInvoice.Application.Relations
+@using WynnwaveInvoice.Domain.Relations
+@inject RelationService Relations
+@inject NavigationManager Nav
+
+<PageTitle>@(IsEdit ? "Klant bewerken" : "Nieuwe klant")</PageTitle>
+
+<div>
+    <div class="flex items-center justify-between">
+        <div>
+            <button class="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700" @onclick="@(() => Nav.NavigateTo("/klanten"))">
+                <i class="ti ti-arrow-left text-sm"></i> Terug naar klanten
+            </button>
+            <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900">@(IsEdit ? "Klant bewerken" : "Nieuwe klant")</h1>
+        </div>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-400">Laden…</div>
+    }
+    else
+    {
+        <div class="mt-6 grid items-start gap-6 lg:grid-cols-2">
+            <!-- Algemeen -->
+            <div class="panel">
+                <h2 class="font-display text-base font-semibold text-slate-900">Algemeen</h2>
+                <div class="mt-5 space-y-4">
+                    <div>
+                        <label class="lbl">Type</label>
+                        @if (IsEdit)
+                        {
+                            <input class="input-field bg-slate-50 text-slate-500" value="@TypeLabel(_form.Type)" disabled />
+                            <p class="hint mt-1 text-xs text-slate-400">Het type kan na aanmaken niet meer gewijzigd worden.</p>
+                        }
+                        else
+                        {
+                            <select class="input-field" @bind="_form.Type">
+                                <option value="@RelationType.Debtor">Debiteur</option>
+                                <option value="@RelationType.Creditor">Crediteur</option>
+                                <option value="@RelationType.Both">Beide</option>
+                            </select>
+                        }
+                    </div>
+                    <div>
+                        <label class="lbl">Naam <span class="text-red-500">*</span></label>
+                        <input class="input-field" @bind="_form.Name" placeholder="Bedrijfsnaam" />
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="lbl">E-mail</label>
+                            <input type="email" class="input-field" @bind="_form.Email" placeholder="info@bedrijf.nl" />
+                        </div>
+                        <div>
+                            <label class="lbl">Telefoon</label>
+                            <input class="input-field" @bind="_form.Phone" placeholder="010 123 4567" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adres -->
+            <div class="panel">
+                <h2 class="font-display text-base font-semibold text-slate-900">Adres</h2>
+                <div class="mt-5 space-y-4">
+                    <div class="grid gap-4 sm:grid-cols-[1fr_7rem_7rem]">
+                        <div>
+                            <label class="lbl">Straat <span class="text-red-500">*</span></label>
+                            <input class="input-field" @bind="_form.StreetName" placeholder="Kerkstraat" />
+                        </div>
+                        <div>
+                            <label class="lbl">Huisnr. <span class="text-red-500">*</span></label>
+                            <input class="input-field" @bind="_form.HouseNumber" placeholder="12" />
+                        </div>
+                        <div>
+                            <label class="lbl">Toev.</label>
+                            <input class="input-field" @bind="_form.HouseNumberAddition" placeholder="A" />
+                        </div>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="lbl">Postcode <span class="text-red-500">*</span></label>
+                            <input class="input-field" @bind="_form.PostalCode" placeholder="1234 AB" />
+                        </div>
+                        <div>
+                            <label class="lbl">Plaats <span class="text-red-500">*</span></label>
+                            <input class="input-field" @bind="_form.City" placeholder="Amsterdam" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="lbl">Land <span class="text-red-500">*</span></label>
+                        <input class="input-field" @bind="_form.Country" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zakelijke gegevens -->
+        <div class="panel mt-6">
+            <h2 class="font-display text-base font-semibold text-slate-900">Zakelijke gegevens</h2>
+            <div class="mt-5 grid gap-4 sm:grid-cols-3">
+                <div>
+                    <label class="lbl">Btw-nummer</label>
+                    <input class="input-field" @bind="_form.VatNumber" placeholder="NL000000000B00" />
+                </div>
+                <div>
+                    <label class="lbl">KvK-nummer</label>
+                    <input class="input-field" @bind="_form.ChamberOfCommerceNumber" placeholder="12345678" />
+                </div>
+                <div>
+                    <label class="lbl">IBAN</label>
+                    <input class="input-field" @bind="_form.Iban" placeholder="NL00 BANK 0000 0000 00" />
+                </div>
+                <div class="sm:col-span-3">
+                    <label class="lbl">Notitie</label>
+                    <textarea class="input-field" rows="2" @bind="_form.Notes" placeholder="Optioneel"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contactpersonen -->
+        <div class="panel mt-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="font-display text-base font-semibold text-slate-900">Contactpersonen</h2>
+                    <p class="mt-0.5 text-sm text-slate-500">Wie is je aanspreekpunt bij deze klant?</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" @onclick="AddContact"><i class="ti ti-plus"></i> Contactpersoon toevoegen</button>
+            </div>
+
+            @if (_form.Contacts.Count == 0)
+            {
+                <div class="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-5 text-sm text-slate-400">
+                    <i class="ti ti-user-plus text-lg"></i>
+                    <span>Nog geen contactpersonen. Voeg er een toe als je een vaste contactpersoon hebt.</span>
+                </div>
+            }
+            else
+            {
+                <div class="mt-4 space-y-3">
+                    @foreach (var c in _form.Contacts)
+                    {
+                        <div class="rounded-xl border border-slate-200 p-4">
+                            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <div>
+                                    <label class="lbl">Voornaam <span class="text-red-500">*</span></label>
+                                    <input class="input-field" @bind="c.FirstName" />
+                                </div>
+                                <div>
+                                    <label class="lbl">Achternaam <span class="text-red-500">*</span></label>
+                                    <input class="input-field" @bind="c.LastName" />
+                                </div>
+                                <div>
+                                    <label class="lbl">Functie</label>
+                                    <input class="input-field" @bind="c.JobTitle" placeholder="bv. Inkoper" />
+                                </div>
+                                <div>
+                                    <label class="lbl">E-mail</label>
+                                    <input type="email" class="input-field" @bind="c.Email" />
+                                </div>
+                                <div>
+                                    <label class="lbl">Telefoon</label>
+                                    <input class="input-field" @bind="c.Phone" />
+                                </div>
+                                <div class="flex items-end justify-between gap-3">
+                                    <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+                                        <input type="checkbox" class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500/30"
+                                               checked="@c.IsPrimary"
+                                               @onchange="@(e => SetPrimary(c, (bool)e.Value!))" />
+                                        Primair contact
+                                    </label>
+                                    <button class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-red-600" @onclick="@(() => RemoveContact(c))">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-danger mt-6"><i class="ti ti-alert-circle mt-0.5 text-lg"></i><div><p class="alert-title">Opslaan mislukt</p><p>@_error</p></div></div>
+        }
+
+        <div class="mt-6 flex items-center justify-end gap-2">
+            <button class="btn btn-secondary" @onclick="@(() => Nav.NavigateTo("/klanten"))">Annuleren</button>
+            <button class="btn btn-primary" @onclick="Save" disabled="@_busy">
+                @if (_busy) { <i class="ti ti-loader-2 animate-spin"></i> }
+                <i class="ti ti-device-floppy"></i> @(IsEdit ? "Wijzigingen opslaan" : "Klant aanmaken")
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid? Id { get; set; }
+    private bool IsEdit => Id is not null;
+
+    private RelationForm _form = new();
+    private bool _loading = true;
+    private bool _busy;
+    private string? _error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        if (IsEdit)
+        {
+            var detail = await Relations.GetForEditAsync(Id!.Value);
+            if (detail is null) { Nav.NavigateTo("/klanten"); return; }
+            _form = MapToForm(detail);
+        }
+        else
+        {
+            _form = new RelationForm();
+        }
+        _loading = false;
+    }
+
+    private void AddContact() => _form.Contacts.Add(new ContactForm());
+    private void RemoveContact(ContactForm c) => _form.Contacts.Remove(c);
+
+    private void SetPrimary(ContactForm c, bool value)
+    {
+        if (value)
+            foreach (var other in _form.Contacts.Where(x => x != c))
+                other.IsPrimary = false;
+        c.IsPrimary = value;
+    }
+
+    private async Task Save()
+    {
+        _error = null;
+        _busy = true;
+        try
+        {
+            var contacts = _form.Contacts
+                .Select(c => new RelationContactInput(c.Id, c.FirstName, c.LastName, c.Email, c.Phone, c.JobTitle, c.IsPrimary))
+                .ToList();
+
+            if (IsEdit)
+            {
+                await Relations.UpdateAsync(new UpdateRelationRequest(
+                    Id!.Value, _form.Name,
+                    _form.StreetName, _form.HouseNumber, _form.HouseNumberAddition,
+                    _form.PostalCode, _form.City, _form.Country,
+                    _form.Email, _form.Phone, _form.VatNumber, _form.ChamberOfCommerceNumber,
+                    _form.Iban, _form.Notes, contacts));
+            }
+            else
+            {
+                await Relations.CreateAsync(new CreateRelationRequest(
+                    _form.Type, _form.Name,
+                    _form.StreetName, _form.HouseNumber, _form.HouseNumberAddition,
+                    _form.PostalCode, _form.City, _form.Country,
+                    _form.Email, _form.Phone, _form.VatNumber, _form.ChamberOfCommerceNumber,
+                    _form.Iban, _form.Notes, contacts));
+            }
+
+            Nav.NavigateTo("/klanten");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            _busy = false;
+        }
+    }
+
+    private static RelationForm MapToForm(RelationDetail d) => new()
+    {
+        Type = d.Type,
+        Name = d.Name,
+        StreetName = d.StreetName,
+        HouseNumber = d.HouseNumber,
+        HouseNumberAddition = d.HouseNumberAddition,
+        PostalCode = d.PostalCode,
+        City = d.City,
+        Country = d.Country,
+        Email = d.Email,
+        Phone = d.Phone,
+        VatNumber = d.VatNumber,
+        ChamberOfCommerceNumber = d.ChamberOfCommerceNumber,
+        Iban = d.Iban,
+        Notes = d.Notes,
+        Contacts = d.Contacts
+            .Select(c => new ContactForm
+            {
+                Id = c.Id, FirstName = c.FirstName, LastName = c.LastName,
+                Email = c.Email, Phone = c.Phone, JobTitle = c.JobTitle, IsPrimary = c.IsPrimary
+            })
+            .ToList()
+    };
+
+    private static string TypeLabel(RelationType type) => type switch
+    {
+        RelationType.Debtor => "Debiteur",
+        RelationType.Creditor => "Crediteur",
+        RelationType.Both => "Beide",
+        _ => type.ToString()
+    };
+
+    private sealed class RelationForm
+    {
+        public RelationType Type { get; set; } = RelationType.Debtor;
+        public string Name { get; set; } = string.Empty;
+        public string StreetName { get; set; } = string.Empty;
+        public string HouseNumber { get; set; } = string.Empty;
+        public string? HouseNumberAddition { get; set; }
+        public string PostalCode { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string Country { get; set; } = "Nederland";
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
+        public string? VatNumber { get; set; }
+        public string? ChamberOfCommerceNumber { get; set; }
+        public string? Iban { get; set; }
+        public string? Notes { get; set; }
+        public List<ContactForm> Contacts { get; set; } = new();
+    }
+
+    private sealed class ContactForm
+    {
+        public Guid? Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
+        public string? JobTitle { get; set; }
+        public bool IsPrimary { get; set; }
+    }
+}
