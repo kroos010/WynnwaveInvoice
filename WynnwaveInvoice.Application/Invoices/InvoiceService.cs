@@ -19,6 +19,9 @@ public sealed class InvoiceService
         _unitOfWork = unitOfWork;
     }
  
+    public Task<IReadOnlyList<InvoiceListItem>> GetAllAsync(CancellationToken ct = default)
+        => _invoices.GetAllAsync(ct);
+
     public async Task<Guid> CreateDraftAsync(CreateDraftInvoiceRequest request, CancellationToken ct = default)
     {
         var relation = await _relations.GetByIdAsync(request.RelationId, ct)

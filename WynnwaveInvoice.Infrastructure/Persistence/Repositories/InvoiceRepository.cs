@@ -14,6 +14,21 @@ public sealed class InvoiceRepository : IInvoiceRepository
         => await _db.Invoices
             .Include(i => i.Lines)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
- 
+
+    public async Task<IReadOnlyList<InvoiceListItem>> GetAllAsync(CancellationToken cancellationToken = default)
+        => await (
+            from inv in _db.Invoices
+            join rel in _db.Relations on inv.RelationId equals rel.Id
+            orderby inv.InvoiceDate descending, inv.InvoiceNumber descending
+            select new InvoiceListItem(
+                inv.Id,
+                inv.InvoiceNumber,
+                rel.Name,
+                inv.InvoiceDate,
+                inv.DueDate,
+                inv.Lines.Sum(l => l.Quantity * l.UnitPrice * (1 + l.VATPercentage / 100m)),
+                inv.Status)
+        ).ToListAsync(cancellationToken);
+
     public void Add(Invoice invoice) => _db.Invoices.Add(invoice);
 }

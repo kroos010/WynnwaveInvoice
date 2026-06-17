@@ -1,0 +1,173 @@
+@page "/facturen"
+@rendermode InteractiveServer
+@using System.Globalization
+@using WynnwaveInvoice.Application.Invoices
+@using WynnwaveInvoice.Domain.Invoices
+@inject InvoiceService Invoices
+@inject NavigationManager Nav
+
+<PageTitle>Facturen</PageTitle>
+
+<div>
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900">Facturen</h1>
+            <p class="mt-1 text-sm text-slate-500">Beheer en volg al je verkoop- en inkoopfacturen.</p>
+        </div>
+        <button class="btn btn-primary" @onclick="@(() => Nav.NavigateTo("/facturen/nieuw"))">
+            <i class="ti ti-plus"></i> Nieuwe factuur
+        </button>
+    </div>
+
+    @* ---- Statusfilter ---- *@
+    <div class="mt-6 flex flex-wrap gap-2">
+        @foreach (var tab in _tabs)
+        {
+            <button class="@TabClass(tab.Filter)" @onclick="@(() => _activeFilter = tab.Filter)">
+                @tab.Label
+                @if (tab.Count > 0)
+                {
+                    <span class="ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none @TabBadgeClass(tab.Filter)">@tab.Count</span>
+                }
+            </button>
+        }
+    </div>
+
+    @* ---- Tabel ---- *@
+    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        @if (_loading)
+        {
+            <div class="px-6 py-16 text-center text-sm text-slate-400">Laden…</div>
+        }
+        else if (_filtered.Count == 0 && _all.Count == 0)
+        {
+            <div class="flex flex-col items-center gap-3 px-6 py-20 text-center">
+                <span class="grid h-14 w-14 place-items-center rounded-2xl bg-brand-50 text-brand-400">
+                    <i class="ti ti-file-invoice text-2xl"></i>
+                </span>
+                <p class="text-sm font-semibold text-slate-700">Nog geen facturen</p>
+                <p class="max-w-xs text-sm text-slate-400">Maak je eerste factuur aan en begin met factureren.</p>
+                <button class="btn btn-primary mt-1" @onclick="@(() => Nav.NavigateTo("/facturen/nieuw"))">
+                    <i class="ti ti-plus"></i> Nieuwe factuur
+                </button>
+            </div>
+        }
+        else if (_filtered.Count == 0)
+        {
+            <div class="px-6 py-16 text-center text-sm text-slate-400">
+                Geen facturen met de status <strong>@_tabs.First(t => t.Filter == _activeFilter).Label</strong>.
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50/60 text-xs uppercase tracking-wide text-slate-400">
+                            <th class="px-6 py-3 font-semibold">Factuur</th>
+                            <th class="px-3 py-3 font-semibold">Klant</th>
+                            <th class="px-3 py-3 font-semibold">Factuurdatum</th>
+                            <th class="px-3 py-3 font-semibold">Vervaldatum</th>
+                            <th class="px-3 py-3 text-right font-semibold">Bedrag</th>
+                            <th class="px-3 py-3 font-semibold">Status</th>
+                            <th class="px-6 py-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var inv in _filtered)
+                        {
+                            <tr class="cursor-pointer transition hover:bg-slate-50" @onclick="@(() => Nav.NavigateTo($"/facturen/{inv.Id}"))">
+                                <td class="px-6 py-4 font-semibold tabular-nums text-slate-900">@inv.InvoiceNumber</td>
+                                <td class="px-3 py-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">
+                                            @Initials(inv.RelationName)
+                                        </span>
+                                        <span class="font-medium text-slate-700">@inv.RelationName</span>
+                                    </div>
+                                </td>
+                                <td class="px-3 py-4 text-slate-500">@inv.InvoiceDate.ToString("d MMM yyyy", Nl)</td>
+                                <td class="px-3 py-4 @DueDateClass(inv)">@inv.DueDate.ToString("d MMM yyyy", Nl)</td>
+                                <td class="px-3 py-4 text-right font-semibold tabular-nums text-slate-900">@Euro(inv.Total)</td>
+                                <td class="px-3 py-4">
+                                    <span class="@StatusBadgeClass(inv.Status)">@StatusLabel(inv.Status)</span>
+                                </td>
+                                <td class="px-6 py-4 text-right text-slate-300">
+                                    <i class="ti ti-chevron-right"></i>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-slate-100 px-6 py-3 text-xs text-slate-400">
+                <span>@_filtered.Count @(_filtered.Count == 1 ? "factuur" : "facturen")</span>
+                <span class="font-semibold tabular-nums text-slate-700">Totaal @Euro(_filtered.Sum(i => i.Total))</span>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly CultureInfo Nl = CultureInfo.GetCultureInfo("nl-NL");
+
+    private IReadOnlyList<InvoiceListItem> _all = Array.Empty<InvoiceListItem>();
+    private InvoiceStatus? _activeFilter;
+    private bool _loading = true;
+
+    private IReadOnlyList<InvoiceListItem> _filtered =>
+        _activeFilter is null ? _all : _all.Where(i => i.Status == _activeFilter).ToList();
+
+    private record Tab(string Label, InvoiceStatus? Filter, int Count);
+
+    private IReadOnlyList<Tab> _tabs => new Tab[]
+    {
+        new("Alle",        null,                    _all.Count),
+        new("Concept",     InvoiceStatus.Draft,     _all.Count(i => i.Status == InvoiceStatus.Draft)),
+        new("Verzonden",   InvoiceStatus.Sent,      _all.Count(i => i.Status == InvoiceStatus.Sent)),
+        new("Betaald",     InvoiceStatus.Paid,      _all.Count(i => i.Status == InvoiceStatus.Paid)),
+        new("Achterstallig", InvoiceStatus.Overdue, _all.Count(i => i.Status == InvoiceStatus.Overdue)),
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _all = await Invoices.GetAllAsync();
+        _loading = false;
+    }
+
+    private string TabClass(InvoiceStatus? filter) =>
+        _activeFilter == filter
+            ? "rounded-lg px-3.5 py-1.5 text-sm font-semibold bg-brand-600 text-white shadow-sm"
+            : "rounded-lg px-3.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 transition";
+
+    private string TabBadgeClass(InvoiceStatus? filter) =>
+        _activeFilter == filter ? "bg-white/25 text-white" : "bg-slate-200 text-slate-500";
+
+    private static string StatusLabel(InvoiceStatus status) => status switch
+    {
+        InvoiceStatus.Draft   => "Concept",
+        InvoiceStatus.Sent    => "Verzonden",
+        InvoiceStatus.Paid    => "Betaald",
+        InvoiceStatus.Overdue => "Achterstallig",
+        _ => status.ToString()
+    };
+
+    private static string StatusBadgeClass(InvoiceStatus status) => status switch
+    {
+        InvoiceStatus.Draft   => "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset bg-slate-100 text-slate-600 ring-slate-500/20",
+        InvoiceStatus.Sent    => "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset bg-brand-50 text-brand-700 ring-brand-600/20",
+        InvoiceStatus.Paid    => "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+        InvoiceStatus.Overdue => "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset bg-red-50 text-red-700 ring-red-600/20",
+        _ => "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset bg-slate-100 text-slate-600 ring-slate-500/20"
+    };
+
+    private string DueDateClass(InvoiceListItem inv) =>
+        inv.Status == InvoiceStatus.Overdue ? "text-red-600 font-medium" : "text-slate-500";
+
+    private static string Initials(string name) =>
+        string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2).Select(w => char.ToUpperInvariant(w[0])));
+
+    private static string Euro(decimal value) => value.ToString("C", Nl);
+}
