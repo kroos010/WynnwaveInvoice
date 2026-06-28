@@ -58,10 +58,11 @@ public sealed class Invoice : AggregateRoot, IAuditable
         return invoice;
     }
 
-    public InvoiceLine AddLine(string description, decimal quantity, decimal unitPrice, decimal vatPercentage)
+    public InvoiceLine AddLine(string description, decimal quantity, decimal unitPrice, decimal vatPercentage,
+                               DateOnly? periodStart = null, DateOnly? periodEnd = null)
     {
         EnsureEditable();
-        var line = InvoiceLine.Create(Id, description, quantity, unitPrice, vatPercentage, _lines.Count);
+        var line = InvoiceLine.Create(Id, description, quantity, unitPrice, vatPercentage, _lines.Count, periodStart, periodEnd);
         _lines.Add(line);
         return line;
     }

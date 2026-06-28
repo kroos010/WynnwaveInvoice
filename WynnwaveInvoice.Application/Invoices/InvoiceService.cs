@@ -38,7 +38,7 @@ public sealed class InvoiceService
             request.InvoiceDate.AddDays(request.PaymentTermDays));
  
         foreach (var line in request.Lines)
-            invoice.AddLine(line.Description, line.Quantity, line.UnitPrice, line.VatPercentage);
+            invoice.AddLine(line.Description, line.Quantity, line.UnitPrice, line.VatPercentage, line.PeriodStart, line.PeriodEnd);
  
         _invoices.Add(invoice);
         await _unitOfWork.SaveChangesAsync(ct);
@@ -53,4 +53,10 @@ public sealed record CreateDraftInvoiceRequest(
     int PaymentTermDays,
     IReadOnlyList<CreateInvoiceLine> Lines);
  
-public sealed record CreateInvoiceLine(string Description, decimal Quantity, decimal UnitPrice, decimal VatPercentage);
+public sealed record CreateInvoiceLine(
+    string Description,
+    decimal Quantity,
+    decimal UnitPrice,
+    decimal VatPercentage,
+    DateOnly? PeriodStart = null,
+    DateOnly? PeriodEnd = null);

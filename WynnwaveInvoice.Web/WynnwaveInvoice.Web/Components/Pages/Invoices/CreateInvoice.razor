@@ -110,17 +110,17 @@
                 <thead>
                     <tr class="border-y border-slate-100 bg-slate-50/60 text-xs uppercase tracking-wide text-slate-400">
                         <th class="w-24 py-3 pl-6 pr-3 text-left font-semibold">Aantal</th>
-                        <th class="w-[40%] py-3 px-3 text-left font-semibold">Omschrijving</th>
+                        <th class="w-[38%] py-3 px-3 text-left font-semibold">Omschrijving</th>
                         <th class="w-28 py-3 px-3 text-left font-semibold">Btw</th>
                         <th class="w-32 py-3 px-3 text-left font-semibold">Prijs p/e</th>
                         <th class="w-36 py-3 px-3 text-right font-semibold">Regeltotaal</th>
-                        <th class="w-14 py-3 pl-3 pr-6"></th>
+                        <th class="w-20 py-3 pl-3 pr-6"></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @foreach (var line in _lines)
                     {
-                        <tr>
+                        <tr class="border-t border-slate-100">
                             <td class="py-4 pl-6 pr-3"><input type="number" step="1" class="input-field w-full text-right" @bind="line.Quantity" /></td>
                             <td class="px-3 py-4"><input class="input-field w-full" placeholder="Omschrijving" @bind="line.Description" /></td>
                             <td class="px-3 py-4">
@@ -137,12 +137,46 @@
                                 </div>
                             </td>
                             <td class="px-3 py-4 text-right font-medium tabular-nums text-slate-900">@Euro(LineTotal(line))</td>
-                            <td class="py-4 pl-3 pr-6 text-right">
-                                <button class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-red-600" @onclick="() => RemoveLine(line)">
-                                    <i class="ti ti-trash"></i>
-                                </button>
+                            <td class="py-4 pl-3 pr-6">
+                                <div class="flex items-center justify-end gap-1">
+                                    <button title="@(line.HasPeriod ? "Periode verwijderen" : "Periode toevoegen")"
+                                            class="rounded-lg p-1.5 transition hover:bg-slate-100 @(line.HasPeriod ? "text-brand-500" : "text-slate-300 hover:text-slate-500")"
+                                            @onclick="() => TogglePeriod(line)">
+                                        <i class="ti ti-calendar-event"></i>
+                                    </button>
+                                    <button class="rounded-lg p-1.5 text-slate-300 transition hover:bg-slate-100 hover:text-red-600" @onclick="() => RemoveLine(line)">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
+                        @if (line.HasPeriod)
+                        {
+                            <tr class="border-t border-slate-100 bg-slate-50/60">
+                                <td colspan="6" class="px-6 pb-4 pt-3">
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <span class="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                            <i class="ti ti-calendar-event text-brand-400"></i> Periode
+                                        </span>
+                                        <div class="flex items-center gap-2">
+                                            <input type="date" class="input-field h-8 w-40 py-1 text-sm"
+                                                   value="@line.PeriodStart?.ToString("yyyy-MM-dd")"
+                                                   @onchange="e => line.PeriodStart = ParseDate(e.Value?.ToString())" />
+                                            <span class="text-slate-400">—</span>
+                                            <input type="date" class="input-field h-8 w-40 py-1 text-sm"
+                                                   value="@line.PeriodEnd?.ToString("yyyy-MM-dd")"
+                                                   @onchange="e => line.PeriodEnd = ParseDate(e.Value?.ToString())" />
+                                        </div>
+                                        @if (line.PeriodStart.HasValue && line.PeriodEnd.HasValue)
+                                        {
+                                            <span class="text-xs text-slate-400">
+                                                @line.PeriodStart.Value.ToString("d MMM", Nl) – @line.PeriodEnd.Value.ToString("d MMM yyyy", Nl)
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                     }
                     @if (_lines.Count == 0)
                     {
@@ -202,6 +236,19 @@
     private void AddLine() => _lines.Add(new LineInput());
     private void RemoveLine(LineInput line) => _lines.Remove(line);
 
+    private static void TogglePeriod(LineInput line)
+    {
+        line.HasPeriod = !line.HasPeriod;
+        if (line.HasPeriod)
+        {
+            line.PeriodStart ??= DateOnly.FromDateTime(DateTime.Today);
+            line.PeriodEnd ??= DateOnly.FromDateTime(DateTime.Today);
+        }
+    }
+
+    private static DateOnly? ParseDate(string? value) =>
+        DateOnly.TryParse(value, out var d) ? d : null;
+
     private static decimal LineSub(LineInput l) => l.Quantity * l.UnitPrice;
     private static decimal LineTotal(LineInput l) => LineSub(l) * (1 + l.VatPercentage / 100m);
     private decimal Subtotal => _lines.Sum(LineSub);
@@ -219,7 +266,9 @@
 
         var lines = _lines
             .Where(l => !string.IsNullOrWhiteSpace(l.Description))
-            .Select(l => new CreateInvoiceLine(l.Description, l.Quantity, l.UnitPrice, l.VatPercentage))
+            .Select(l => new CreateInvoiceLine(l.Description, l.Quantity, l.UnitPrice, l.VatPercentage,
+                l.HasPeriod ? l.PeriodStart : null,
+                l.HasPeriod ? l.PeriodEnd : null))
             .ToList();
 
         if (lines.Count == 0) { _error = "Voeg minimaal een regel met omschrijving toe."; return; }
@@ -246,5 +295,8 @@
         public string Description { get; set; } = string.Empty;
         public decimal VatPercentage { get; set; } = 21m;
         public decimal UnitPrice { get; set; }
+        public bool HasPeriod { get; set; }
+        public DateOnly? PeriodStart { get; set; }
+        public DateOnly? PeriodEnd { get; set; }
     }
 }
